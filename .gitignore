@@ -1,0 +1,83 @@
+# OS files
+.DS_Store
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Editor and IDE files
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.vs/
+*.iml
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+application-local.yml
+application-local.yaml
+application-*.local.yml
+application-*.local.yaml
+*.pem
+*.key
+*.p12
+*.jks
+
+# Frontend dependencies and build output
+node_modules/
+dist/
+dist-ssr/
+build/
+.vite/
+.pwa/
+coverage/
+*.tsbuildinfo
+
+# Backend build output
+.gradle/
+gradle-app.setting
+build/
+out/
+target/
+bin/
+
+# Java runtime and crash logs
+hs_err_pid*
+replay_pid*
+
+# Database and local runtime files
+*.sqlite
+*.sqlite3
+*.db
+*.h2.db
+*.mv.db
+*.trace.db
+mysql-data/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.swp
+*.swo
+*.bak
