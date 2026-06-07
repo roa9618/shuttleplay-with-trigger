@@ -89,3 +89,7 @@ temp/
 *.swp
 *.swo
 *.bak
+
+# Local notes
+local-todo.md
+*.local.md
