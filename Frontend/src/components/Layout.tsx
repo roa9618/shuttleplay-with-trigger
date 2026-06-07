@@ -1,9 +1,26 @@
-import { Outlet, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Outlet, useLocation, useMatches } from 'react-router-dom';
 import DesktopSidebar from './DesktopSidebar';
 import Logo from './Logo';
 
+const defaultDocumentTitle = '셔틀플레이 | 배드민턴 모임 관리';
+
+type RouteHandle = {
+  title?: string;
+};
+
 export default function Layout() {
   const location = useLocation();
+  const matches = useMatches();
+
+  useEffect(() => {
+    const currentTitle = [...matches]
+      .reverse()
+      .map(match => (match.handle as RouteHandle | undefined)?.title)
+      .find(Boolean);
+
+    document.title = currentTitle ? `${currentTitle} | 셔틀플레이` : defaultDocumentTitle;
+  }, [matches]);
 
   // Routes that should show the desktop sidebar
   const desktopRoutes = [
