@@ -37,12 +37,12 @@ export const styles = {
   actionCard: (tone: string) => [
     'min-h-48 rounded-3xl border-2 p-6 md:p-8 transition-all hover:shadow-xl',
     tone === 'accent'
-      ? 'bg-accent/15 border-accent/50 hover:border-accent'
+      ? 'bg-accent/70 border-indigo-300 hover:border-indigo-500'
       : 'bg-primary/10 border-primary/40 hover:border-primary',
   ].join(' '),
   actionBadge: (tone: string) => (
     tone === 'accent'
-      ? 'bg-accent text-accent-foreground'
+      ? 'bg-indigo-500 text-white'
       : 'bg-primary text-primary-foreground'
   ),
 } as const;
