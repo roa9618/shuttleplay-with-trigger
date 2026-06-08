@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Outlet, useLocation, useMatches } from 'react-router-dom';
 import DesktopSidebar from './DesktopSidebar';
+import Footer from './Footer';
 import Logo from './Logo';
 import { styles } from './Layout.styles';
 
@@ -41,6 +42,8 @@ export default function Layout() {
     location.pathname.includes('/report') ||
     location.pathname.includes('/create-session');
 
+  const showFooter = location.pathname === '/';
+
   if (showDesktopLayout) {
     return (
       <div className = {styles.desktopShell}>
@@ -57,8 +60,9 @@ export default function Layout() {
   }
 
   return (
-    <div className = {styles.mobileShell}>
+    <div className = {showFooter ? styles.homeShell : styles.mobileShell}>
       <Outlet />
+      {showFooter && <Footer />}
     </div>
   );
 }
