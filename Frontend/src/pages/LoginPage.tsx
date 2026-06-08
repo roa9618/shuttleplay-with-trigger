@@ -4,8 +4,8 @@ import ShuttlecockIcon from '../components/ShuttlecockIcon';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { ArrowLeft, Sparkles } from 'lucide-react';
-import { useState } from 'react';
+import { Sparkles } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useActionFeedback } from '../utils/useActionFeedback';
 import googleLogo from '../assets/social/google_logo.svg';
 import kakaoLogo from '../assets/social/kakao_logo.png';
@@ -14,7 +14,7 @@ import { styles } from './LoginPage.styles';
 
 function AppleLogo() {
   return (
-    <svg viewBox = "0 0 24 24" className = {styles.socialIcon} aria-hidden = "true">
+    <svg viewBox = "0 0 24 24" className = {styles.appleIcon} aria-hidden = "true">
       <path fill = "currentColor" d = "M16.52 12.22c-.02-2.16 1.77-3.2 1.85-3.25-1.01-1.48-2.58-1.68-3.13-1.7-1.33-.14-2.6.78-3.27.78-.68 0-1.72-.76-2.83-.74-1.46.02-2.8.85-3.55 2.15-1.51 2.62-.39 6.5 1.09 8.63.72 1.04 1.58 2.21 2.71 2.17 1.09-.04 1.5-.7 2.82-.7 1.31 0 1.69.7 2.84.68 1.17-.02 1.92-1.06 2.63-2.11.83-1.21 1.17-2.38 1.19-2.44-.03-.01-2.29-.88-2.35-3.47zM14.37 5.86c.6-.73 1-1.74.89-2.75-.86.03-1.9.57-2.52 1.3-.55.64-1.03 1.67-.9 2.65.96.07 1.94-.49 2.53-1.2z" />
     </svg>
   );
@@ -24,16 +24,20 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const { message, showMessage } = useActionFeedback();
   const [formData, setFormData] = useState({
-    email: '',
+    loginId: '',
     password: '',
   });
 
   const socialProviders = [
-    { name: '구글', image: googleLogo, tone: 'google' },
-    { name: '카카오톡', image: kakaoLogo, tone: 'kakao' },
-    { name: '네이버', image: naverLogo, tone: 'naver' },
-    { name: '애플', icon: AppleLogo, tone: 'apple' },
+    { name: '구글', loginLabel: '구글로 로그인', image: googleLogo, tone: 'google' },
+    { name: '카카오', loginLabel: '카카오로 로그인', image: kakaoLogo, tone: 'kakao' },
+    { name: '네이버', loginLabel: '네이버로 로그인', image: naverLogo, tone: 'naver' },
+    { name: '애플', loginLabel: '애플로 로그인', icon: AppleLogo, tone: 'apple' },
   ];
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,11 +60,6 @@ export default function LoginPage() {
       </div>
 
       <div className = {styles.stack}>
-        <Link to = "/" className = {styles.backLink}>
-          <ArrowLeft className = {styles.arrowLeftIcon} />
-          돌아가기
-        </Link>
-
         <div className = {styles.stack2}>
           <div className = {styles.row}>
             <Logo size = "lg" />
@@ -76,8 +75,8 @@ export default function LoginPage() {
         <div className = {styles.header}>
           <form onSubmit = {handleSubmit} className = {styles.form}>
             <div className = {styles.stack3}>
-              <Label htmlFor = "email">이메일</Label>
-              <Input id = "email" type = "email" placeholder = "이메일을 입력하세요" className = {styles.input} value = {formData.email} onChange = {(e) => setFormData({ ...formData, email: e.target.value })}
+              <Label htmlFor = "loginId">아이디</Label>
+              <Input id = "loginId" type = "text" placeholder = "아이디를 입력하세요" className = {styles.input} value = {formData.loginId} onChange = {(e) => setFormData({ ...formData, loginId: e.target.value })}
                 required
               />
             </div>
@@ -116,7 +115,7 @@ export default function LoginPage() {
                     <provider.icon />
                   ) : null}
                 </span>
-                {provider.name}로 로그인
+                {provider.loginLabel}
               </Button>
             ))}
           </div>
@@ -135,15 +134,6 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        {/* Decorative Badge */}
-        <div className = {styles.row}>
-          <div className = {styles.summaryBox}>
-            <div className = {styles.row4}>
-              <ShuttlecockIcon size = {16} className = {styles.shuttlecockIcon} />
-              <span>셔틀플레이와 함께하세요</span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
