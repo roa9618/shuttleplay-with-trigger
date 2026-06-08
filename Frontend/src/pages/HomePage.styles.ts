@@ -1,7 +1,7 @@
 export const styles = {
   page: 'min-h-screen bg-background',
   header: 'border-b border-border bg-card',
-  headerInner: 'max-w-5xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between',
+  headerInner: 'w-full px-4 md:px-8 py-4 flex items-center justify-between',
   row: 'flex gap-2',
   roundButton: 'rounded-full',
   logInIcon: 'w-4 h-4 mr-2',
