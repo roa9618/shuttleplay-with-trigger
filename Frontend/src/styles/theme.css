@@ -9,8 +9,8 @@
   --brand-purple-light: #C084FC;
   --brand-lavender: #E9D5FF;
   --brand-lavender-light: #F3E8FF;
-  --brand-yellow: #FBBF24;
-  --brand-yellow-light: #FCD34D;
+  --brand-indigo: #6366F1;
+  --brand-indigo-light: #A5B4FC;
 
   /* Background - Warm, soft cream/lavender tones */
   --background: #FDFCFE;
@@ -36,9 +36,9 @@
   --muted: #F8F5FB;
   --muted-foreground: #7C6B8A;
 
-  /* Accent - Limited yellow for highlights */
-  --accent: #FEF3C7;
-  --accent-foreground: #92400E;
+  /* Accent - Indigo for secondary actions and highlights */
+  --accent: #EEF2FF;
+  --accent-foreground: #3730A3;
 
   /* Destructive */
   --destructive: #EF4444;
@@ -61,7 +61,7 @@
   --chart-1: #A855F7;
   --chart-2: #C084FC;
   --chart-3: #E9D5FF;
-  --chart-4: #FBBF24;
+  --chart-4: #6366F1;
   --chart-5: #9333EA;
 
   /* Radius - Soft, friendly rounded corners */
@@ -91,8 +91,8 @@
   --secondary-foreground: #E9D5FF;
   --muted: #3B2563;
   --muted-foreground: #C4B5FD;
-  --accent: #78350F;
-  --accent-foreground: #FEF3C7;
+  --accent: #312E81;
+  --accent-foreground: #E0E7FF;
   --destructive: #DC2626;
   --destructive-foreground: #FFFFFF;
   --border: #3B2563;
@@ -103,7 +103,7 @@
   --chart-1: #C084FC;
   --chart-2: #A855F7;
   --chart-3: #9333EA;
-  --chart-4: #FBBF24;
+  --chart-4: #818CF8;
   --chart-5: #D8B4FE;
   --sidebar: #2D1B4E;
   --sidebar-foreground: #F3E8FF;

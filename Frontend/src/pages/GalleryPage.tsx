@@ -16,7 +16,7 @@ export default function GalleryPage() {
     { name: '전체 멤버', path: '/groups/1/members', description: '모임 멤버 전체 목록 및 통계' },
     { name: '모임 설정', path: '/groups/1/settings', description: '모임 정보 및 설정 관리' },
     { name: '모임 만들기', path: '/groups/new', description: '새로운 모임 생성' },
-    { name: '세션 생성', path: '/groups/1/create-session', description: '오늘 운동 세션 만들기' },
+    { name: '운동 일정 만들기', path: '/groups/1/create-session', description: '오늘 진행할 운동 일정을 등록합니다' },
     { name: '운영자 대시보드', path: '/sessions/demo/dashboard', description: '세션 운영 및 현황 관리' },
     { name: '참가자 관리', path: '/sessions/demo/participants', description: '참가자 상태 및 메모 관리' },
     { name: '경기 후보 큐', path: '/sessions/demo/queue', description: '자동 매칭 및 경기 생성' },
