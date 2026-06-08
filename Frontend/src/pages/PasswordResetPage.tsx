@@ -80,7 +80,7 @@ export default function PasswordResetPage() {
                 <p className = {styles.descriptionText3}>
                   이메일이 오지 않았나요?
                 </p>
-                <Button variant = "outline" className = {styles.submitButton} onClick = {() => setEmailSent(false)}
+                <Button variant = "outline" className = {styles.secondaryButton} onClick = {() => setEmailSent(false)}
                 >
                   다시 보내기
                 </Button>
