@@ -57,7 +57,7 @@ export const router = createBrowserRouter([
       { path: "groups/:groupId", Component: GroupDetailPage, handle: { title: "모임 상세" } },
       { path: "groups/:groupId/members", Component: GroupMembersPage, handle: { title: "구성원 관리" } },
       { path: "groups/:groupId/settings", Component: GroupSettingsPage, handle: { title: "모임 설정" } },
-      { path: "groups/:groupId/create-session", Component: CreateSessionPage, handle: { title: "세션 생성" } },
+      { path: "groups/:groupId/create-session", Component: CreateSessionPage, handle: { title: "운동 일정 만들기" } },
       { path: "sessions/:sessionId/dashboard", Component: OrganizerDashboardPage, handle: { title: "운영 대시보드" } },
       { path: "sessions/:sessionId/participants", Component: ParticipantManagementPage, handle: { title: "참가자 관리" } },
       { path: "sessions/:sessionId/queue", Component: MatchQueuePage, handle: { title: "매칭 대기열" } },

@@ -20,7 +20,7 @@ export default function JoinSessionPage() {
               <QrCode className = {styles.qrCodeIcon} />
             </div>
             <div>
-              <h1 className = {styles.pageTitle}>오늘 운동 참여</h1>
+              <h1 className = {styles.pageTitle}>모임 참여</h1>
               <p className = {styles.descriptionText}>강남 배드민턴 클럽</p>
             </div>
           </div>

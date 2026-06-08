@@ -136,7 +136,7 @@ export default function GroupListPage() {
                       window.location.href = `/groups/${group.id}/create-session`;
                     }}
                   >
-                    세션 만들기
+                    운동 일정 만들기
                   </Button>
                   <Button size = "sm" variant = "outline" className = {styles.roundButton2} onClick = {(e) => {
                       e.preventDefault();

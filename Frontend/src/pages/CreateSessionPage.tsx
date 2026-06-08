@@ -45,7 +45,7 @@ export default function CreateSessionPage() {
           <div className = {styles.row}>
             <Calendar className = {styles.calendarIcon} />
           </div>
-          <h1 className = {styles.pageTitle}>세션 만들기</h1>
+          <h1 className = {styles.pageTitle}>운동 일정 만들기</h1>
           <p className = {styles.descriptionText}>
             오늘의 배드민턴 세션 정보를 입력하세요
           </p>
@@ -227,7 +227,7 @@ export default function CreateSessionPage() {
               <Button type = "submit" className = {styles.submitButton} size = "lg"
               >
                 <Play className = {styles.playIcon} />
-                세션 만들기
+                운동 일정 만들기
               </Button>
             </div>
           </form>

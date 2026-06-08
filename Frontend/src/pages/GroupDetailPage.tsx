@@ -75,7 +75,7 @@ export default function GroupDetailPage() {
             <Link to = {`/groups/${groupId}/create-session`} className = {styles.cardLink}>
               <Button className = {styles.fullWidthButton} size = "lg">
                 <Calendar className = {styles.calendarIcon} />
-                오늘 세션 만들기
+                오늘 운동 일정 만들기
               </Button>
             </Link>
             <Button variant = "outline" size = "lg" className = {styles.roundButton2} onClick = {copyInviteLink}
