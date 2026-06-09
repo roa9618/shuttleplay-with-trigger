@@ -4,8 +4,8 @@ import Logo from '../components/Logo';
 import ShuttlecockIcon from '../components/ShuttlecockIcon';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
-import { Calendar, ChevronRight, ClipboardCheck, Download, LogIn, QrCode, Settings, UserPlus, Users } from 'lucide-react';
-import { isAuthenticated } from '../utils/authSession';
+import { Calendar, ChevronDown, ChevronRight, ClipboardCheck, Download, LogIn, LogOut, QrCode, Settings, UserPlus, Users } from 'lucide-react';
+import { endAuthSession, getAuthSession, isAuthenticated, type AuthSession } from '../utils/authSession';
 import { usePwaInstall } from '../utils/usePwaInstall';
 import { styles } from './HomePage.styles';
 
@@ -13,7 +13,10 @@ export default function HomePage() {
   const navigate = useNavigate();
   const { install, isInstalled, installGuide } = usePwaInstall();
   const [toastMessage, setToastMessage] = useState('');
+  const [session, setSession] = useState<AuthSession | null>(() => getAuthSession());
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const profileMenuRef = useRef<HTMLDivElement | null>(null);
 
   const mainActions = [
     {
@@ -43,10 +46,26 @@ export default function HomePage() {
     { title: '설정', path: '/settings', icon: Settings },
   ];
 
-  useEffect(() => () => {
-    if (toastTimer.current) {
-      clearTimeout(toastTimer.current);
-    }
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!profileMenuRef.current) {
+        return;
+      }
+
+      if (!profileMenuRef.current.contains(event.target as Node)) {
+        setProfileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+
+      if (toastTimer.current) {
+        clearTimeout(toastTimer.current);
+      }
+    };
   }, []);
 
   const showToast = (message: string) => {
@@ -93,25 +112,113 @@ export default function HomePage() {
     });
   };
 
+  const handleProfileNavigation = (path: string) => {
+    setProfileMenuOpen(false);
+    navigate(path);
+  };
+
+  const handleLogout = () => {
+    endAuthSession();
+    setSession(null);
+    setProfileMenuOpen(false);
+    navigate('/', {
+      replace: true,
+    });
+  };
+
   return (
     <div className = {styles.page}>
       <div className = {styles.header}>
         <div className = {styles.headerInner}>
           <Logo size = "md" />
-          <div className = {styles.row}>
-            <Link to = "/login">
-              <Button variant = "ghost" className = {styles.loginButton}>
-                <LogIn className = {styles.logInIcon} />
-                로그인
-              </Button>
-            </Link>
-            <Link to = "/signup">
-              <Button className = {styles.signupButton}>
-                <UserPlus className = {styles.logInIcon} />
-                가입
-              </Button>
-            </Link>
-          </div>
+
+          {session ? (
+            <div ref = {profileMenuRef} className = {styles.profileMenuWrapper}>
+              <button
+                type = "button"
+                className = {styles.profileButton}
+                onClick = {() => setProfileMenuOpen((prev) => !prev)}
+                aria-expanded = {profileMenuOpen}
+                aria-haspopup = "menu"
+              >
+                <span className = {styles.profileName}>{session.name}</span>
+                <ChevronDown className = {styles.chevronDownIcon(profileMenuOpen)} />
+              </button>
+
+              {profileMenuOpen && (
+                <div className = {styles.profileDropdown} role = "menu">
+                  <div className = {styles.profileSummary}>
+                    <div className = {styles.profileSummaryAvatar}>
+                      {session.name.slice(0, 1)}
+                    </div>
+                    <div className = {styles.profileSummaryText}>
+                      <strong className = {styles.profileSummaryName}>{session.name}</strong>
+                      <span className = {styles.profileSummaryEmail}>{session.email}</span>
+                    </div>
+                  </div>
+
+                  <div className = {styles.menuDivider} />
+
+                  <button
+                    type = "button"
+                    className = {styles.profileMenuItem}
+                    onClick = {() => handleProfileNavigation('/groups')}
+                    role = "menuitem"
+                  >
+                    <Users className = {styles.profileMenuIcon} />
+                    내 모임
+                  </button>
+
+                  <button
+                    type = "button"
+                    className = {styles.profileMenuItem}
+                    onClick = {() => handleProfileNavigation('/my-record')}
+                    role = "menuitem"
+                  >
+                    <ClipboardCheck className = {styles.profileMenuIcon} />
+                    내 기록
+                  </button>
+
+                  <button
+                    type = "button"
+                    className = {styles.profileMenuItem}
+                    onClick = {() => handleProfileNavigation('/settings')}
+                    role = "menuitem"
+                  >
+                    <Settings className = {styles.profileMenuIcon} />
+                    설정
+                  </button>
+
+                  <div className = {styles.menuDivider} />
+
+                  <button
+                    type = "button"
+                    className = {styles.logoutMenuItem}
+                    onClick = {handleLogout}
+                    role = "menuitem"
+                  >
+                    <LogOut className = {styles.profileMenuIcon} />
+                    로그아웃
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className = {styles.row}>
+              <Link to = "/login">
+                <Button variant = "ghost" className = {styles.loginButton}>
+                  <LogIn className = {styles.logInIcon} />
+                  로그인
+                </Button>
+              </Link>
+              <Link to = "/signup">
+                <Button className = {styles.signupButton}>
+                  <UserPlus className = {styles.logInIcon} />
+                  가입
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
       </div>
 
@@ -196,6 +303,7 @@ export default function HomePage() {
             <div className = {styles.cardGrid2}>
               {quickLinks.map((link) => {
                 const Icon = link.icon;
+
                 return (
                   <button
                     key = {link.title}
