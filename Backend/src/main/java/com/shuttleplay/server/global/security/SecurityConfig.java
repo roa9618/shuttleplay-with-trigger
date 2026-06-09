@@ -54,6 +54,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/token/reissue").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/password-reset/send").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/password-reset/confirm").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
