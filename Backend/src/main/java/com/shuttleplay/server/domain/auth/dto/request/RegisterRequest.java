@@ -26,6 +26,9 @@ public class RegisterRequest {
     )
     private String password;
 
+    @NotBlank(message = "비밀번호 확인은 필수입니다.")
+    private String passwordConfirm;
+
     @NotBlank(message = "이름은 필수입니다.")
     @Size(max = 50, message = "이름은 50자 이하여야 합니다.")
     private String name;
