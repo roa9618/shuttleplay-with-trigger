@@ -86,7 +86,7 @@ export default function LoginPage() {
 
     setFieldFeedback(null);
     startAuthSession(account);
-    navigate(location.state?.from ?? '/groups', {
+    navigate(location.state?.from ?? '/', {
       replace: true,
     });
   };

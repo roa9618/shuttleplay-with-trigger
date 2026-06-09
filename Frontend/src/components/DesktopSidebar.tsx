@@ -9,6 +9,7 @@ import {
   Grid3x3
 } from 'lucide-react';
 import { Button } from './ui/button';
+import { endAuthSession } from '../utils/authSession';
 import { styles } from './DesktopSidebar.styles';
 
 export default function DesktopSidebar() {
@@ -26,6 +27,13 @@ export default function DesktopSidebar() {
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
     return location.pathname.startsWith(path);
+  };
+
+  const handleLogout = () => {
+    endAuthSession();
+    navigate('/', {
+      replace: true,
+    });
   };
 
   return (
@@ -50,7 +58,7 @@ export default function DesktopSidebar() {
       </nav>
 
       <div className = {styles.footerActions}>
-        <Button variant = "ghost" className = {styles.fullWidthButton} onClick = {() => navigate('/')}
+        <Button variant = "ghost" className = {styles.fullWidthButton} onClick = {handleLogout}
         >
           <LogOut className = {styles.logOutIcon} />
           로그아웃
