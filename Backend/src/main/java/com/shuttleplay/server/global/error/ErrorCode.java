@@ -29,7 +29,11 @@ public enum ErrorCode {
     EMAIL_NOT_VERIFIED(HttpStatus.BAD_REQUEST, "EMAIL_NOT_VERIFIED", "이메일 인증이 완료되지 않았습니다."),
     INVALID_VERIFICATION_CODE(HttpStatus.BAD_REQUEST, "INVALID_VERIFICATION_CODE", "인증 코드가 일치하지 않습니다."),
     EXPIRED_VERIFICATION_CODE(HttpStatus.BAD_REQUEST, "EXPIRED_VERIFICATION_CODE", "인증 코드가 만료되었습니다."),
-    EMAIL_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "EMAIL_SEND_FAILED", "이메일 발송에 실패했습니다.");
+    EMAIL_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "EMAIL_SEND_FAILED", "이메일 발송에 실패했습니다."),
+
+    PASSWORD_RESET_TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "PASSWORD_RESET_TOKEN_NOT_FOUND", "비밀번호 재설정 토큰을 찾을 수 없습니다."),
+    INVALID_PASSWORD_RESET_TOKEN(HttpStatus.BAD_REQUEST, "INVALID_PASSWORD_RESET_TOKEN", "유효하지 않은 비밀번호 재설정 토큰입니다."),
+    EXPIRED_PASSWORD_RESET_TOKEN(HttpStatus.BAD_REQUEST, "EXPIRED_PASSWORD_RESET_TOKEN", "비밀번호 재설정 토큰이 만료되었습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
