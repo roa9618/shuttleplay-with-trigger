@@ -240,7 +240,7 @@ public class AuthService {
 
         String encodedPassword = passwordEncoder.encode(request.getNewPassword());
 
-        user.changePassword(encodedPassword);
+        user.updatePassword(encodedPassword);
         passwordResetToken.use();
 
         refreshTokenRepository.findByUserIdAndRevokedFalse(user.getId())
