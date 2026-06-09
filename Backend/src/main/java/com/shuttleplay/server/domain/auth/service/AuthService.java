@@ -3,19 +3,25 @@ package com.shuttleplay.server.domain.auth.service;
 import com.shuttleplay.server.domain.auth.dto.request.CheckEmailRequest;
 import com.shuttleplay.server.domain.auth.dto.request.EmailVerificationConfirmRequest;
 import com.shuttleplay.server.domain.auth.dto.request.EmailVerificationSendRequest;
+import com.shuttleplay.server.domain.auth.dto.request.LoginRequest;
 import com.shuttleplay.server.domain.auth.dto.request.RegisterRequest;
 import com.shuttleplay.server.domain.auth.dto.response.CheckEmailResponse;
 import com.shuttleplay.server.domain.auth.dto.response.EmailVerificationConfirmResponse;
 import com.shuttleplay.server.domain.auth.dto.response.EmailVerificationSendResponse;
+import com.shuttleplay.server.domain.auth.dto.response.LoginResponse;
+import com.shuttleplay.server.domain.auth.dto.response.LoginUserResponse;
 import com.shuttleplay.server.domain.auth.dto.response.RegisterResponse;
 import com.shuttleplay.server.domain.auth.entity.EmailVerification;
 import com.shuttleplay.server.domain.auth.repository.EmailVerificationRepository;
 import com.shuttleplay.server.domain.auth.util.VerificationCodeGenerator;
 import com.shuttleplay.server.domain.user.entity.User;
+import com.shuttleplay.server.domain.user.enums.AuthProvider;
+import com.shuttleplay.server.domain.user.enums.UserStatus;
 import com.shuttleplay.server.domain.user.repository.UserRepository;
 import com.shuttleplay.server.domain.user.util.InitialMmrCalculator;
 import com.shuttleplay.server.global.error.BusinessException;
 import com.shuttleplay.server.global.error.ErrorCode;
+import com.shuttleplay.server.global.security.JwtTokenProvider;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,6 +38,7 @@ public class AuthService {
     private final EmailVerificationRepository emailVerificationRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
 
     public CheckEmailResponse checkEmail(CheckEmailRequest request) {
         boolean available = !userRepository.existsByEmail(request.getEmail());
@@ -101,6 +108,22 @@ public class AuthService {
         return RegisterResponse.from(savedUser);
     }
 
+    public LoginResponse login(LoginRequest request) {
+        User user = userRepository.findByEmailAndProvider(request.getEmail(), AuthProvider.LOCAL)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        validateLoginAvailable(user);
+        validatePassword(request.getPassword(), user.getPassword());
+
+        String accessToken = jwtTokenProvider.createAccessToken(user);
+
+        return LoginResponse.of(
+                accessToken,
+                jwtTokenProvider.getAccessTokenExpirationMillis(),
+                LoginUserResponse.from(user)
+        );
+    }
+
     private void validateEmailAvailable(String email) {
         if (userRepository.existsByEmail(email)) {
             throw new BusinessException(ErrorCode.DUPLICATE_EMAIL);
@@ -133,6 +156,26 @@ public class AuthService {
 
         if (emailVerification.isCodeMismatch(code)) {
             throw new BusinessException(ErrorCode.INVALID_VERIFICATION_CODE);
+        }
+    }
+
+    private void validateLoginAvailable(User user) {
+        if (user.getStatus() == UserStatus.DELETED) {
+            throw new BusinessException(ErrorCode.DELETED_USER);
+        }
+
+        if (user.getStatus() == UserStatus.INACTIVE) {
+            throw new BusinessException(ErrorCode.INACTIVE_USER);
+        }
+
+        if (!user.isLocalAccount()) {
+            throw new BusinessException(ErrorCode.SOCIAL_ACCOUNT_LOGIN_NOT_ALLOWED);
+        }
+    }
+
+    private void validatePassword(String rawPassword, String encodedPassword) {
+        if (encodedPassword == null || !passwordEncoder.matches(rawPassword, encodedPassword)) {
+            throw new BusinessException(ErrorCode.INVALID_PASSWORD);
         }
     }
 }
