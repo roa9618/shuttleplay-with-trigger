@@ -40,6 +40,7 @@ import com.shuttleplay.server.global.security.JwtTokenProvider;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -199,9 +200,26 @@ public class AuthService {
 
     @Transactional
     public PasswordResetSendResponse sendPasswordResetLink(PasswordResetSendRequest request) {
-        User user = findLocalUserForPasswordReset(request.getEmail());
+        Optional<User> optionalUser = userRepository.findByEmailAndProvider(
+                request.getEmail(),
+                AuthProvider.LOCAL
+        );
 
-        validateAccountStatus(user);
+        if (optionalUser.isEmpty()) {
+            return PasswordResetSendResponse.of(
+                    request.getEmail(),
+                    PASSWORD_RESET_TOKEN_EXPIRE_MINUTES
+            );
+        }
+
+        User user = optionalUser.get();
+
+        if (user.getStatus() != UserStatus.ACTIVE) {
+            return PasswordResetSendResponse.of(
+                    request.getEmail(),
+                    PASSWORD_RESET_TOKEN_EXPIRE_MINUTES
+            );
+        }
 
         String token = PasswordResetTokenGenerator.generate();
         LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(PASSWORD_RESET_TOKEN_EXPIRE_MINUTES);
@@ -336,17 +354,6 @@ public class AuthService {
                 .orElseThrow(() -> {
                     if (userRepository.existsByEmail(email)) {
                         return new BusinessException(ErrorCode.SOCIAL_ACCOUNT_CANNOT_LOGIN_WITH_PASSWORD);
-                    }
-
-                    return new BusinessException(ErrorCode.USER_NOT_FOUND);
-                });
-    }
-
-    private User findLocalUserForPasswordReset(String email) {
-        return userRepository.findByEmailAndProvider(email, AuthProvider.LOCAL)
-                .orElseThrow(() -> {
-                    if (userRepository.existsByEmail(email)) {
-                        return new BusinessException(ErrorCode.SOCIAL_ACCOUNT_CANNOT_RESET_PASSWORD);
                     }
 
                     return new BusinessException(ErrorCode.USER_NOT_FOUND);
