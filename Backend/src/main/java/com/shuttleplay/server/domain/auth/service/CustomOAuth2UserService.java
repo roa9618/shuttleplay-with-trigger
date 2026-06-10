@@ -5,6 +5,7 @@ import com.shuttleplay.server.domain.auth.oauth.OAuth2UserInfoFactory;
 import com.shuttleplay.server.domain.user.entity.User;
 import com.shuttleplay.server.domain.user.repository.UserRepository;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -38,7 +39,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         User user = findOrCreateUser(userInfo);
 
-        Map<String, Object> attributes = userInfo.getAttributes();
+        Map<String, Object> attributes = new HashMap<>(userInfo.getAttributes());
+
         attributes.put("userId", user.getId());
         attributes.put("profileCompleted", user.isProfileCompleted());
 
