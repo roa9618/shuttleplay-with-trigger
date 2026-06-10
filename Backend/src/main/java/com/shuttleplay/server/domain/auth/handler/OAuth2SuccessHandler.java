@@ -40,7 +40,7 @@ public class OAuth2SuccessHandler implements org.springframework.security.web.au
             Authentication authentication
     ) throws IOException, ServletException {
         OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
-        Long userId = Long.valueOf(String.valueOf(oauth2User.getAttribute("userId")));
+        Long userId = extractUserId(oauth2User);
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
@@ -55,6 +55,24 @@ public class OAuth2SuccessHandler implements org.springframework.security.web.au
         );
 
         response.sendRedirect(redirectUrl);
+    }
+
+    private Long extractUserId(OAuth2User oauth2User) {
+        Object userIdAttribute = oauth2User.getAttribute("userId");
+
+        if (userIdAttribute == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        if (userIdAttribute instanceof Long userId) {
+            return userId;
+        }
+
+        if (userIdAttribute instanceof Integer userId) {
+            return userId.longValue();
+        }
+
+        return Long.valueOf(userIdAttribute.toString());
     }
 
     private RefreshToken createRefreshToken(Long userId) {
