@@ -1,65 +1,97 @@
 export type UserRole = 'USER' | 'ADMIN';
 
 export type AuthSession = {
+  id?: number;
   email: string;
   name: string;
   role: UserRole;
 };
 
-type MockAccount = AuthSession & {
-  password: string;
+export type AuthTokens = {
+  accessToken: string;
+  refreshToken: string;
 };
 
 const AUTH_SESSION_KEY = 'shuttleplay-auth-session';
+const AUTH_TOKENS_KEY = 'shuttleplay-auth-tokens';
 
-const MOCK_ACCOUNTS: MockAccount[] = [
-  {
-    email: 'user@shuttleplay.kr',
-    password: 'User1234',
-    name: '일반 회원',
-    role: 'USER',
-  },
-  {
-    email: 'admin@shuttleplay.kr',
-    password: 'Admin1234',
-    name: '운영 관리자',
-    role: 'ADMIN',
-  },
-];
-
-export function authenticateMockAccount(email: string, password: string) {
-  return MOCK_ACCOUNTS.find((account) => (
-    account.email === email.toLowerCase() && account.password === password
-  )) ?? null;
-}
-
-function parseStoredSession(storedSession: string | null, storage: Storage): AuthSession | null {
-  if (!storedSession) {
+function parseStoredValue<T>(storedValue: string | null, storage: Storage, key: string): T | null {
+  if (!storedValue) {
     return null;
   }
 
   try {
-    return JSON.parse(storedSession) as AuthSession;
+    return JSON.parse(storedValue) as T;
   } catch {
-    storage.removeItem(AUTH_SESSION_KEY);
+    storage.removeItem(key);
     return null;
   }
 }
 
-export function getAuthSession(): AuthSession | null {
-  const sessionStorageSession = parseStoredSession(
-    window.sessionStorage.getItem(AUTH_SESSION_KEY),
+function getStoredValue<T>(key: string): T | null {
+  const sessionStorageValue = parseStoredValue<T>(
+    window.sessionStorage.getItem(key),
     window.sessionStorage,
+    key,
   );
 
-  if (sessionStorageSession) {
-    return sessionStorageSession;
+  if (sessionStorageValue) {
+    return sessionStorageValue;
   }
 
-  return parseStoredSession(
-    window.localStorage.getItem(AUTH_SESSION_KEY),
+  return parseStoredValue<T>(
+    window.localStorage.getItem(key),
     window.localStorage,
+    key,
   );
+}
+
+function getActiveStorage() {
+  if (window.sessionStorage.getItem(AUTH_SESSION_KEY)) {
+    return window.sessionStorage;
+  }
+
+  if (window.localStorage.getItem(AUTH_SESSION_KEY)) {
+    return window.localStorage;
+  }
+
+  return window.sessionStorage;
+}
+
+function getInactiveStorage(storage: Storage) {
+  return storage === window.localStorage ? window.sessionStorage : window.localStorage;
+}
+
+function persistSession(session: AuthSession, tokens: AuthTokens | null, remember = false) {
+  const storage = remember ? window.localStorage : window.sessionStorage;
+  const inactiveStorage = getInactiveStorage(storage);
+
+  inactiveStorage.removeItem(AUTH_SESSION_KEY);
+  inactiveStorage.removeItem(AUTH_TOKENS_KEY);
+
+  storage.setItem(AUTH_SESSION_KEY, JSON.stringify(session));
+
+  if (tokens) {
+    storage.setItem(AUTH_TOKENS_KEY, JSON.stringify(tokens));
+  } else {
+    storage.removeItem(AUTH_TOKENS_KEY);
+  }
+}
+
+export function getAuthSession(): AuthSession | null {
+  return getStoredValue<AuthSession>(AUTH_SESSION_KEY);
+}
+
+export function getAuthTokens(): AuthTokens | null {
+  return getStoredValue<AuthTokens>(AUTH_TOKENS_KEY);
+}
+
+export function getAuthAccessToken() {
+  return getAuthTokens()?.accessToken ?? null;
+}
+
+export function getAuthRefreshToken() {
+  return getAuthTokens()?.refreshToken ?? null;
 }
 
 export function isAuthenticated() {
@@ -70,21 +102,38 @@ export function hasRole(role: UserRole) {
   return getAuthSession()?.role === role;
 }
 
-export function startAuthSession(account: MockAccount, remember = false) {
-  const session: AuthSession = {
-    email: account.email,
-    name: account.name,
-    role: account.role,
-  };
+export function startAuthSession(session: AuthSession, remember = false, tokens: AuthTokens | null = null) {
+  persistSession(session, tokens, remember);
+}
 
-  const storage = remember ? window.localStorage : window.sessionStorage;
-  const unusedStorage = remember ? window.sessionStorage : window.localStorage;
+export function startTokenAuthSession(session: AuthSession, tokens: AuthTokens, remember = false) {
+  persistSession(session, tokens, remember);
+}
 
-  unusedStorage.removeItem(AUTH_SESSION_KEY);
+export function updateAuthTokens(tokens: AuthTokens) {
+  const storage = getActiveStorage();
+
+  storage.setItem(AUTH_TOKENS_KEY, JSON.stringify(tokens));
+  getInactiveStorage(storage).removeItem(AUTH_TOKENS_KEY);
+}
+
+export function updateAuthSession(session: AuthSession) {
+  const storage = getActiveStorage();
+  const currentTokens = getAuthTokens();
+
   storage.setItem(AUTH_SESSION_KEY, JSON.stringify(session));
+
+  if (currentTokens) {
+    storage.setItem(AUTH_TOKENS_KEY, JSON.stringify(currentTokens));
+  }
+
+  getInactiveStorage(storage).removeItem(AUTH_SESSION_KEY);
+  getInactiveStorage(storage).removeItem(AUTH_TOKENS_KEY);
 }
 
 export function endAuthSession() {
   window.sessionStorage.removeItem(AUTH_SESSION_KEY);
+  window.sessionStorage.removeItem(AUTH_TOKENS_KEY);
   window.localStorage.removeItem(AUTH_SESSION_KEY);
+  window.localStorage.removeItem(AUTH_TOKENS_KEY);
 }
