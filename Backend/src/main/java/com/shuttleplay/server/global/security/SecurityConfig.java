@@ -3,6 +3,7 @@ package com.shuttleplay.server.global.security;
 import com.shuttleplay.server.domain.auth.handler.OAuth2FailureHandler;
 import com.shuttleplay.server.domain.auth.handler.OAuth2SuccessHandler;
 import com.shuttleplay.server.domain.auth.service.CustomOAuth2UserService;
+import com.shuttleplay.server.domain.auth.service.CustomOidcUserService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -28,6 +29,7 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final CustomOidcUserService customOidcUserService;
     private final OAuth2SuccessHandler oauth2SuccessHandler;
     private final OAuth2FailureHandler oauth2FailureHandler;
 
@@ -68,6 +70,7 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
+                                .oidcUserService(customOidcUserService)
                         )
                         .successHandler(oauth2SuccessHandler)
                         .failureHandler(oauth2FailureHandler)
