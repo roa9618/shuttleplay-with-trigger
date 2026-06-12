@@ -70,7 +70,7 @@ export default function PasswordResetPage() {
           </div>
           <div className = {styles.stack}>
             <h1 className = {styles.pageTitle}>
-              {emailSent ? '이메일을 보냈어요' : '비밀번호 찾기'}
+              {emailSent ? '이메일을 보냈어요' : '비밀번호 재설정'}
             </h1>
             <p className = {styles.descriptionText}>
               {emailSent ? `${email}로 재설정 링크를 보냈습니다` : '가입하신 이메일 주소를 입력해주세요'}

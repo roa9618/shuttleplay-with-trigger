@@ -297,7 +297,7 @@ export default function LoginPage() {
               </label>
 
               <Link to = "/password-reset" className = {styles.cardLink}>
-                비밀번호 찾기
+                비밀번호 재설정
               </Link>
             </div>
 
