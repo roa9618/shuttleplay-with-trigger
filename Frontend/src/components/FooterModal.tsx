@@ -1,7 +1,9 @@
-import { useEffect, useId, useMemo, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
+import { ApiClientError } from '../utils/apiClient';
 import type { FooterDocument, FooterDocumentKey } from '../utils/footerContent';
+import { createInquiry, type InquiryCategory } from '../utils/inquiryApi';
 import { styles } from './FooterModal.styles';
 
 interface FooterModalProps {
@@ -11,7 +13,7 @@ interface FooterModalProps {
 }
 
 type ContactForm = {
-  category: string;
+  category: InquiryCategory;
   name: string;
   email: string;
   subject: string;
@@ -25,7 +27,7 @@ type ContactStatus = {
 };
 
 const defaultContactForm: ContactForm = {
-  category: '서비스 이용 문의',
+  category: 'SERVICE_USAGE',
   name: '',
   email: '',
   subject: '',
@@ -34,23 +36,23 @@ const defaultContactForm: ContactForm = {
 };
 
 const contactCategories = [
-  '서비스 이용 문의',
-  '계정 및 로그인',
-  '모임 운영',
-  '경기 기록 및 MMR',
-  '오류 제보',
-  '개인정보 권리 행사',
-  '신고 및 운영 정책',
-  '기타 문의',
-];
+  { value: 'SERVICE_USAGE', label: '서비스 이용 문의' },
+  { value: 'ACCOUNT_LOGIN', label: '계정 및 로그인' },
+  { value: 'GROUP_OPERATION', label: '모임 운영' },
+  { value: 'MATCH_RECORD_MMR', label: '경기 기록 및 MMR' },
+  { value: 'ERROR_REPORT', label: '오류 제보' },
+  { value: 'PRIVACY_RIGHTS', label: '개인정보 권리 행사' },
+  { value: 'REPORT_POLICY', label: '신고 및 운영 정책' },
+  { value: 'OTHER', label: '기타 문의' },
+] as const satisfies ReadonlyArray<{ value: InquiryCategory; label: string }>;
 
 export default function FooterModal({ documentKey, document, onClose }: FooterModalProps) {
   const titleId = useId();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const [contactForm, setContactForm] = useState<ContactForm>(defaultContactForm);
   const [contactStatus, setContactStatus] = useState<ContactStatus | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const isContactDocument = documentKey === 'contact';
-  const contactDraft = useMemo(() => createContactDraft(contactForm), [contactForm]);
 
   useEffect(() => {
     if (!document) return;
@@ -76,6 +78,7 @@ export default function FooterModal({ documentKey, document, onClose }: FooterMo
     if (!isContactDocument) {
       setContactForm(defaultContactForm);
       setContactStatus(null);
+      setIsSubmitting(false);
     }
   }, [isContactDocument]);
 
@@ -84,11 +87,16 @@ export default function FooterModal({ documentKey, document, onClose }: FooterMo
   const handleContactSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    if (isSubmitting) return;
+
     const validationMessage = validateContactForm(contactForm);
     if (validationMessage) {
       setContactStatus({ type: 'error', message: validationMessage });
       return;
     }
+
+    setIsSubmitting(true);
+    setContactStatus(null);
 
     try {
       window.localStorage.setItem('shuttleplay-contact-draft', JSON.stringify({
@@ -100,16 +108,34 @@ export default function FooterModal({ documentKey, document, onClose }: FooterMo
     }
 
     try {
-      await window.navigator.clipboard.writeText(contactDraft);
+      const response = await createInquiry({
+        category: contactForm.category,
+        name: contactForm.name.trim(),
+        email: contactForm.email.trim(),
+        subject: contactForm.subject.trim(),
+        message: contactForm.message.trim(),
+        privacyAgreed: contactForm.agree,
+      });
+
+      try {
+        window.localStorage.removeItem('shuttleplay-contact-draft');
+      } catch {
+        // 문의 접수 성공 여부와 관계없는 로컬 임시 저장소 오류는 무시합니다.
+      }
       setContactStatus({
         type: 'success',
-        message: '문의 내용이 작성되어 복사되었습니다. 공식 문의 채널이 연결되면 이 양식으로 바로 접수할 수 있습니다.',
+        message: `문의가 접수되었습니다. 접수 번호는 ${response.id}번입니다.`,
       });
-    } catch {
+      setContactForm(defaultContactForm);
+    } catch (error) {
       setContactStatus({
-        type: 'success',
-        message: '문의 내용이 작성되어 이 기기에 임시 저장되었습니다. 공식 문의 채널이 연결되면 이 양식으로 바로 접수할 수 있습니다.',
+        type: 'error',
+        message: error instanceof ApiClientError
+          ? error.detail ?? error.message
+          : '문의 접수 중 오류가 발생했습니다. 작성 내용은 이 기기에 임시 저장되었습니다.',
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -157,10 +183,13 @@ export default function FooterModal({ documentKey, document, onClose }: FooterMo
                     <select
                       className = {styles.select}
                       value = {contactForm.category}
-                      onChange = {event => setContactForm(current => ({ ...current, category: event.target.value }))}
+                      onChange = {event => setContactForm(current => ({
+                        ...current,
+                        category: event.target.value as InquiryCategory,
+                      }))}
                     >
                       {contactCategories.map(category => (
-                        <option key = {category} value = {category}>{category}</option>
+                        <option key = {category.value} value = {category.value}>{category.label}</option>
                       ))}
                     </select>
                   </label>
@@ -172,6 +201,7 @@ export default function FooterModal({ documentKey, document, onClose }: FooterMo
                       value = {contactForm.name}
                       onChange = {event => setContactForm(current => ({ ...current, name: event.target.value }))}
                       placeholder = "답변받을 이름"
+                      maxLength = {50}
                     />
                   </label>
 
@@ -183,6 +213,7 @@ export default function FooterModal({ documentKey, document, onClose }: FooterMo
                       value = {contactForm.email}
                       onChange = {event => setContactForm(current => ({ ...current, email: event.target.value }))}
                       placeholder = "reply@example.com"
+                      maxLength = {100}
                     />
                   </label>
 
@@ -193,6 +224,7 @@ export default function FooterModal({ documentKey, document, onClose }: FooterMo
                       value = {contactForm.subject}
                       onChange = {event => setContactForm(current => ({ ...current, subject: event.target.value }))}
                       placeholder = "문의 제목"
+                      maxLength = {100}
                     />
                   </label>
                 </div>
@@ -205,6 +237,7 @@ export default function FooterModal({ documentKey, document, onClose }: FooterMo
                     onChange = {event => setContactForm(current => ({ ...current, message: event.target.value }))}
                     placeholder = "발생한 화면, 상황, 원하는 처리 내용을 가능한 한 구체적으로 적어주세요."
                     rows = {7}
+                    maxLength = {2000}
                   />
                 </label>
 
@@ -227,7 +260,9 @@ export default function FooterModal({ documentKey, document, onClose }: FooterMo
                 )}
 
                 <div className = {styles.formActions}>
-                  <button type = "submit" className = {styles.submitButton}>문의 내용 저장</button>
+                  <button type = "submit" className = {styles.submitButton} disabled = {isSubmitting}>
+                    {isSubmitting ? '문의 접수 중' : '문의 접수'}
+                  </button>
                 </div>
               </form>
             </section>
@@ -256,17 +291,4 @@ function validateContactForm(form: ContactForm) {
   if (!form.agree) return '문의 처리를 위한 개인정보 수집·이용 동의가 필요합니다.';
 
   return '';
-}
-
-function createContactDraft(form: ContactForm) {
-  return [
-    '[셔틀플레이 문의]',
-    `문의 유형: ${form.category}`,
-    `이름: ${form.name.trim()}`,
-    `이메일: ${form.email.trim()}`,
-    `제목: ${form.subject.trim()}`,
-    '',
-    '문의 내용',
-    form.message.trim(),
-  ].join('\n');
 }
