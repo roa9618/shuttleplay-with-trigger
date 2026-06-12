@@ -7,6 +7,9 @@ export type AuthSession = {
   role: UserRole;
   provider?: string;
   profileCompleted?: boolean;
+  gender?: string | null;
+  grade?: string | null;
+  profileImageUrl?: string | null;
 };
 
 export type AuthTokens = {

@@ -31,6 +31,7 @@ import SessionReportPage from "../pages/SessionReportPage";
 import ParticipantSessionReportPage from "../pages/ParticipantSessionReportPage";
 import DisplayBoardPage from "../pages/DisplayBoardPage";
 import SettingsPage from "../pages/SettingsPage";
+import NotificationsPage from "../pages/NotificationsPage";
 import GalleryPage from "../pages/GalleryPage";
 import NotFoundPage from "../pages/NotFoundPage";
 
@@ -78,6 +79,7 @@ export const router = createBrowserRouter([
           { path: "sessions/:sessionId/report", Component: SessionReportPage, handle: { title: "세션 리포트" } },
           { path: "sessions/:sessionId/my-report", Component: ParticipantSessionReportPage, handle: { title: "내 세션 리포트" } },
           { path: "settings", Component: SettingsPage, handle: { title: "설정" } },
+          { path: "notifications", Component: NotificationsPage, handle: { title: "전체 알림" } },
         ],
       },
       { path: "gallery", Component: GalleryPage, handle: { title: "화면 목록" } },

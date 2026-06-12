@@ -29,6 +29,7 @@ export default function Layout() {
     '/groups',
     '/my-record',
     '/settings',
+    '/notifications',
     '/gallery',
   ];
 
