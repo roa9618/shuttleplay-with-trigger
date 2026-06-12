@@ -140,11 +140,10 @@ Content-Type: application/json
 ```json
 {
   "name": "셔틀플레이 테스트 모임",
-  "location": "OO 체육관",
-  "defaultCourtCount": 4,
-  "defaultStartTime": "19:00",
-  "defaultEndTime": "22:00",
-  "description": "정기 배드민턴 모임입니다."
+  "profileImageUrl": null,
+  "activityRegion": "서울특별시 강남구",
+  "description": "정기 배드민턴 모임입니다.",
+  "operationNotice": "참석 등록 마감 시간을 확인해 주세요."
 }
 ```
 
@@ -401,6 +400,7 @@ QR 이미지 응답은 `image/png`입니다.
 | --- | --- | --- | --- |
 | `GET` | `/notifications` | 내 알림 목록 조회 | P2 |
 | `PATCH` | `/notifications/{notificationId}/read` | 알림 읽음 처리 | P2 |
+| `PATCH` | `/notifications/read-all` | 전체 알림 읽음 처리 | P2 |
 | `POST` | `/push-subscriptions` | PWA Push 구독 등록 | P2 |
 | `DELETE` | `/push-subscriptions/{subscriptionId}` | PWA Push 구독 해제 | P2 |
 
