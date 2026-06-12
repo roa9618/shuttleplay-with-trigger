@@ -405,6 +405,15 @@ QR 이미지 응답은 `image/png`입니다.
 | `POST` | `/push-subscriptions` | PWA Push 구독 등록 | P2 |
 | `DELETE` | `/push-subscriptions/{subscriptionId}` | PWA Push 구독 해제 | P2 |
 
+## 문의 API
+
+| Method | Path | 설명 | 우선순위 |
+| --- | --- | --- | --- |
+| `POST` | `/inquiries` | 문의 접수 | P1 |
+
+문의 접수는 로그인 여부와 관계없이 사용할 수 있으며 이름, 답변받을 이메일, 문의 유형, 제목,
+문의 내용과 개인정보 수집·이용 동의 여부를 전달합니다.
+
 ## 운영자 메모 API
 
 | Method | Path | 설명 | 우선순위 |
