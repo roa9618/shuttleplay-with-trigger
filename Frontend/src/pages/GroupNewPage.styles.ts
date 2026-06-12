@@ -90,11 +90,16 @@ export const styles = {
   imageUploadBox: [
     'flex min-h-[170px] flex-col items-center justify-center gap-3',
     'rounded-[24px] border border-dashed border-primary/25',
-    'bg-primary/[0.02] px-6 py-4 text-center',
+    'bg-primary/[0.02] px-6 py-4 text-center transition-colors',
     '[@media(max-height:1000px)]:min-h-[145px]',
     '[@media(max-height:900px)]:min-h-[118px]',
     '[@media(max-height:900px)]:gap-2',
     '[@media(max-height:900px)]:py-2.5',
+  ].join(' '),
+
+  imageUploadBoxDragging: [
+    'border-primary bg-primary/10',
+    'ring-2 ring-primary/15',
   ].join(' '),
 
   imagePreview: [

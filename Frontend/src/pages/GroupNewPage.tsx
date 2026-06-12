@@ -3,6 +3,7 @@ import {
   useRef,
   useState,
   type ChangeEvent,
+  type DragEvent,
   type FormEvent,
 } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -92,6 +93,7 @@ export default function GroupNewPage() {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [isImageDragging, setIsImageDragging] = useState(false);
   const [fieldFeedback, setFieldFeedback] = useState<FieldFeedback>(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -127,13 +129,7 @@ export default function GroupNewPage() {
     );
   };
 
-  const handleImageChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-
-    if (!file) {
-      return;
-    }
-
+  const processImageFile = async (file: File) => {
     if (!file.type.startsWith('image/')) {
       setFieldFeedback({
         field: 'image',
@@ -161,8 +157,42 @@ export default function GroupNewPage() {
         message: '이미지를 처리할 수 없습니다.',
       });
     }
+  };
+
+  const handleImageChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    await processImageFile(file);
 
     event.target.value = '';
+  };
+
+  const handleImageDrag = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (event.type === 'dragenter' || event.type === 'dragover') {
+      setIsImageDragging(true);
+      return;
+    }
+
+    setIsImageDragging(false);
+  };
+
+  const handleImageDrop = async (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsImageDragging(false);
+
+    const file = event.dataTransfer.files?.[0];
+
+    if (file) {
+      await processImageFile(file);
+    }
   };
 
   const handleRemoveImage = () => {
@@ -254,7 +284,13 @@ export default function GroupNewPage() {
               onChange = {handleImageChange}
             />
 
-            <div className = {styles.imageUploadBox}>
+            <div
+              className = {`${styles.imageUploadBox} ${isImageDragging ? styles.imageUploadBoxDragging : ''}`}
+              onDragEnter = {handleImageDrag}
+              onDragOver = {handleImageDrag}
+              onDragLeave = {handleImageDrag}
+              onDrop = {handleImageDrop}
+            >
               {imagePreviewUrl ? (
                 <img
                   src = {imagePreviewUrl}
