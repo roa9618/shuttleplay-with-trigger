@@ -28,6 +28,7 @@ export default function GalleryPage() {
     { name: '세션 리포트', path: '/sessions/demo/report', description: '세션 통계 및 요약' },
     { name: '내 기록', path: '/my-record', description: '개인 경기 기록 및 월별 캘린더' },
     { name: '설정', path: '/settings', description: '프로필 및 알림 설정' },
+    { name: '전체 알림', path: '/notifications', description: '알림 목록 확인 및 읽음 처리' },
     { name: '페이지 갤러리', path: '/gallery', description: '전체 화면 목록과 테스트 진입점' },
     { name: '404', path: '/not-found-preview', description: '존재하지 않는 경로 안내 화면' },
   ];

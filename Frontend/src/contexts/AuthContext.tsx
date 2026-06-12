@@ -29,6 +29,9 @@ function toAuthSession(user: Awaited<ReturnType<typeof getCurrentUser>>): AuthSe
     role: user.role,
     provider: user.provider,
     profileCompleted: user.profileCompleted,
+    gender: user.gender,
+    grade: user.grade,
+    profileImageUrl: user.profileImageUrl,
   };
 }
 
