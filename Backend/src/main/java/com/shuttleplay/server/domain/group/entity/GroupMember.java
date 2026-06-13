@@ -155,6 +155,10 @@ public class GroupMember extends BaseEntity {
         this.memo = memo;
     }
 
+    public void updateLastAccessedAt() {
+        this.lastAccessedAt = LocalDateTime.now();
+    }
+
     public void leave() {
         this.status = GroupMemberStatus.INACTIVE;
         softDelete();
