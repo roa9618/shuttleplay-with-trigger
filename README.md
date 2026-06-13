@@ -77,6 +77,13 @@ cd Backend
 gradlew bootRun
 ```
 
+Backend automatic restart (run in another terminal)
+
+```bash
+cd Backend
+gradlew classes --continuous
+```
+
 ```text
 http://localhost:8080
 ```

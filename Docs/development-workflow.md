@@ -57,6 +57,13 @@ cd Backend
 gradlew.bat bootRun
 ```
 
+백엔드 코드 변경을 자동 반영하려면 다른 터미널에서 continuous build를 함께 실행합니다.
+
+```bat
+cd Backend
+gradlew.bat classes --continuous
+```
+
 ## 설정 파일
 
 백엔드는 공통 설정과 환경별 설정을 나눕니다.
