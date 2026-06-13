@@ -2,7 +2,7 @@ import type { NotificationType } from '../utils/notificationStore';
 
 export const styles = {
   page: [
-    'min-h-screen bg-background px-10 py-10',
+    'min-h-screen bg-background px-10 pb-10 pt-4',
     'bg-[radial-gradient(circle_at_top_right,var(--color-primary)/0.04,transparent_32%)]',
   ].join(' '),
   content: 'mx-auto w-full max-w-[1180px]',
@@ -32,7 +32,7 @@ export const styles = {
       : 'text-muted-foreground hover:bg-primary/5 hover:text-primary [&>span]:bg-primary/10 [&>span]:text-primary',
   ].join(' '),
   summary: 'text-xs text-muted-foreground',
-  list: 'divide-y divide-primary/10',
+  list: 'min-h-[990px] divide-y divide-primary/10',
   item: (read: boolean) => [
     'flex w-full items-center gap-4 px-7 py-5 text-left',
     'transition-colors hover:bg-primary/[0.04]',
@@ -60,7 +60,7 @@ export const styles = {
   unreadDot: 'h-2 w-2 shrink-0 rounded-full bg-primary',
   chevron: 'h-4 w-4 shrink-0 text-muted-foreground/60',
   empty: [
-    'flex min-h-[360px] flex-col items-center justify-center px-6 text-center',
+    'flex min-h-[990px] flex-col items-center justify-center px-6 text-center',
     '[&>strong]:mt-4 [&>strong]:text-base [&>strong]:font-semibold',
     '[&>span]:mt-1.5 [&>span]:text-sm [&>span]:text-muted-foreground',
   ].join(' '),
@@ -68,4 +68,7 @@ export const styles = {
     'flex h-14 w-14 items-center justify-center rounded-full',
     'bg-primary/10 text-primary [&_svg]:h-6 [&_svg]:w-6',
   ].join(' '),
+  pagination: 'flex items-center justify-center gap-1 pt-5',
+  paginationArrow: 'flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary disabled:pointer-events-none disabled:opacity-30 [&_svg]:h-4 [&_svg]:w-4',
+  paginationPage: (active: boolean) => `flex h-9 min-w-9 items-center justify-center rounded-full px-3 text-xs font-medium transition-colors ${active ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20' : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'}`,
 } as const;
