@@ -21,9 +21,9 @@ export type NotificationListResponse = {
   unreadCount: number;
 };
 
-export function getNotifications() {
+export function getNotifications(page = 0, size = 100, unreadOnly = false) {
   return apiClient.get<NotificationListResponse>(
-    '/notifications?page=0&size=100',
+    `/notifications?page=${page}&size=${size}&unreadOnly=${unreadOnly}`,
     { auth: true },
   );
 }

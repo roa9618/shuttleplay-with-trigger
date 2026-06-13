@@ -4,6 +4,7 @@ import {
   Bell,
   CalendarDays,
   CheckCheck,
+  ChevronLeft,
   ChevronRight,
   Trophy,
   Users,
@@ -11,14 +12,26 @@ import {
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import {
-  loadNotifications,
   markAllNotificationsAsRead,
   markNotificationAsRead,
   useNotifications,
   type AppNotification,
   type NotificationType,
 } from '../utils/notificationStore';
+import { getNotifications } from '../utils/notificationApi';
 import { styles } from './NotificationsPage.styles';
+
+const NOTIFICATIONS_PER_PAGE = 9;
+
+function formatCreatedAt(createdAt: string) {
+  const elapsedMinutes = Math.floor((Date.now() - new Date(createdAt).getTime()) / (1000 * 60));
+
+  if (elapsedMinutes < 1) return '방금 전';
+  if (elapsedMinutes < 60) return `${elapsedMinutes}분 전`;
+  if (elapsedMinutes < 1440) return `${Math.floor(elapsedMinutes / 60)}시간 전`;
+  if (elapsedMinutes < 2880) return '어제';
+  return `${Math.floor(elapsedMinutes / 1440)}일 전`;
+}
 
 const notificationIcons: Record<NotificationType, typeof Bell> = {
   SCHEDULE: CalendarDays,
@@ -29,20 +42,52 @@ const notificationIcons: Record<NotificationType, typeof Bell> = {
 
 export default function NotificationsPage() {
   const navigate = useNavigate();
-  const notifications = useNotifications();
+  const notificationUpdates = useNotifications();
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
-  const unreadCount = notifications.filter(notification => !notification.read).length;
-  const visibleNotifications = showUnreadOnly
-    ? notifications.filter(notification => !notification.read)
-    : notifications;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    void loadNotifications();
-  }, []);
+    void getNotifications(currentPage - 1, NOTIFICATIONS_PER_PAGE, showUnreadOnly)
+      .then(response => {
+        setNotifications(response.items.map(notification => ({
+          ...notification,
+          createdAt: formatCreatedAt(notification.createdAt),
+        })));
+        if (!showUnreadOnly) setTotalCount(response.totalElements);
+        setTotalPages(Math.max(1, response.totalPages));
+        setUnreadCount(response.unreadCount);
+
+        if (currentPage > Math.max(1, response.totalPages)) {
+          setCurrentPage(Math.max(1, response.totalPages));
+        }
+      });
+  }, [currentPage, showUnreadOnly, notificationUpdates]);
 
   const openNotification = (notification: AppNotification) => {
-    void markNotificationAsRead(notification.id);
-    navigate(notification.targetPath);
+    void markNotificationAsRead(notification.id).then(() => {
+      setNotifications(current => current.map(item => (
+        item.id === notification.id ? { ...item, read: true } : item
+      )));
+      setUnreadCount(current => Math.max(0, current - (notification.read ? 0 : 1)));
+      navigate(notification.targetPath);
+    });
+  };
+
+  const markAllAsRead = () => {
+    void markAllNotificationsAsRead().then(() => {
+      setNotifications(current => current.map(notification => ({ ...notification, read: true })));
+      setUnreadCount(0);
+      if (showUnreadOnly) setCurrentPage(1);
+    });
+  };
+
+  const changeFilter = (unreadOnly: boolean) => {
+    setShowUnreadOnly(unreadOnly);
+    setCurrentPage(1);
   };
 
   return (
@@ -61,7 +106,7 @@ export default function NotificationsPage() {
             variant = "outline"
             className = {styles.markAllButton}
             disabled = {unreadCount === 0}
-            onClick = {() => void markAllNotificationsAsRead()}
+            onClick = {markAllAsRead}
           >
             <CheckCheck />
             전체 읽음 처리
@@ -74,15 +119,15 @@ export default function NotificationsPage() {
               <button
                 type = "button"
                 className = {styles.tab(!showUnreadOnly)}
-                onClick = {() => setShowUnreadOnly(false)}
+                onClick = {() => changeFilter(false)}
               >
                 전체
-                <span>{notifications.length}</span>
+                <span>{totalCount}</span>
               </button>
               <button
                 type = "button"
                 className = {styles.tab(showUnreadOnly)}
-                onClick = {() => setShowUnreadOnly(true)}
+                onClick = {() => changeFilter(true)}
               >
                 읽지 않음
                 <span>{unreadCount}</span>
@@ -94,9 +139,9 @@ export default function NotificationsPage() {
             </span>
           </div>
 
-          {visibleNotifications.length > 0 ? (
+          {notifications.length > 0 ? (
             <div className = {styles.list}>
-              {visibleNotifications.map(notification => {
+              {notifications.map(notification => {
                 const Icon = notificationIcons[notification.type];
 
                 return (
@@ -134,6 +179,14 @@ export default function NotificationsPage() {
             </div>
           )}
         </section>
+
+        <nav className = {styles.pagination} aria-label = "페이지 이동">
+          <button type = "button" className = {styles.paginationArrow} disabled = {currentPage === 1} onClick = {() => setCurrentPage(currentPage - 1)} aria-label = "이전 페이지"><ChevronLeft /></button>
+          {Array.from({ length: totalPages }, (_, index) => index + 1).map(page => (
+            <button key = {page} type = "button" className = {styles.paginationPage(currentPage === page)} onClick = {() => setCurrentPage(page)}>{page}</button>
+          ))}
+          <button type = "button" className = {styles.paginationArrow} disabled = {currentPage === totalPages} onClick = {() => setCurrentPage(currentPage + 1)} aria-label = "다음 페이지"><ChevronRight /></button>
+        </nav>
       </div>
     </div>
   );
