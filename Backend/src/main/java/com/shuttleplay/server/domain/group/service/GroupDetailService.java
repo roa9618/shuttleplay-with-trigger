@@ -35,9 +35,9 @@ public class GroupDetailService {
     private final GroupNotificationDispatchService notificationDispatch;
     private final GroupEventService events;
 
-    @Transactional(readOnly = true)
     public Map<String, Object> group(Long userId, Long groupId) {
         GroupMember me = access.member(groupId, userId);
+        me.updateLastAccessedAt();
         Group group = me.getGroup();
         Map<String, Object> result = map();
         result.put("id", group.getId()); result.put("name", group.getName()); result.put("profileImageUrl", group.getProfileImageUrl());
