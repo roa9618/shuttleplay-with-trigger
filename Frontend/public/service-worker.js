@@ -22,3 +22,34 @@ self.addEventListener('fetch', (event) => {
     fetch(event.request).catch(() => caches.match('/index.html')),
   );
 });
+
+self.addEventListener('push', (event) => {
+  const data = event.data?.json() ?? {};
+
+  event.waitUntil(self.registration.showNotification(data.title ?? '셔틀플레이 알림', {
+    body: data.message ?? '',
+    icon: '/shuttleplay-icon-192.png',
+    badge: '/shuttleplay-icon-192.png',
+    data: {
+      targetPath: data.targetPath ?? '/notifications',
+    },
+  }));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  const targetUrl = new URL(event.notification.data?.targetPath ?? '/notifications', self.location.origin).href;
+
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+      const existingClient = clients.find(client => new URL(client.url).origin === self.location.origin);
+
+      if (existingClient) {
+        return existingClient.navigate(targetUrl).then(client => client?.focus());
+      }
+
+      return self.clients.openWindow(targetUrl);
+    }),
+  );
+});

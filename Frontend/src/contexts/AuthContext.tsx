@@ -9,6 +9,11 @@ import {
   type AuthSession,
 } from '../utils/authSession';
 import { getCurrentUser } from '../utils/userApi';
+import {
+  clearSystemNotificationLoginRequest,
+  disableSystemNotifications,
+  requestSystemNotificationsAfterLogin,
+} from '../utils/pushNotification';
 
 type AuthContextValue = {
   session: AuthSession | null;
@@ -90,13 +95,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const accessToken = getAuthAccessToken();
 
     if (!accessToken) {
+      clearSystemNotificationLoginRequest();
       clearSession();
       return;
     }
 
-    void logoutAuth().finally(() => {
-      clearSession();
-    });
+    void disableSystemNotifications()
+      .finally(() => logoutAuth())
+      .finally(() => {
+        clearSystemNotificationLoginRequest();
+        clearSession();
+      });
   }, [clearSession]);
 
   useEffect(() => {
@@ -107,6 +116,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     refreshSession();
   }, [refreshSession]);
+
+  useEffect(() => {
+    if (session) {
+      void requestSystemNotificationsAfterLogin();
+    }
+  }, [session]);
 
   const value = useMemo<AuthContextValue>(() => ({
     session,
