@@ -37,7 +37,7 @@ public class GroupNotificationDispatchService {
     public void notifyManagers(Group group, String event, String message) {
         members.findAllByGroupIdAndStatus(group.getId(), GroupMemberStatus.ACTIVE).stream()
                 .filter(member -> member.getRole() != GroupMemberRole.MEMBER)
-                .forEach(member -> send(group, member.getUser(), event, message));
+                .forEach(member -> send(group, member.getUser(), event, message, "/groups/" + group.getId() + "/requests"));
     }
 
     private void notifyUnvoted(GroupSession session, String event, String message) {
@@ -47,22 +47,28 @@ public class GroupNotificationDispatchService {
         }
         members.findAllByGroupIdAndStatus(session.getGroup().getId(), GroupMemberStatus.ACTIVE).stream()
                 .filter(member -> !votedIds.contains(member.getId()))
-                .forEach(member -> send(session.getGroup(), member.getUser(), event + ":" + session.getId(), message));
+                .forEach(member -> send(session.getGroup(), member.getUser(), event + ":" + session.getId(), message, sessionPath(session)));
     }
     private void notifyAll(GroupSession session, String event, String message) {
         members.findAllByGroupIdAndStatus(session.getGroup().getId(), GroupMemberStatus.ACTIVE)
-                .forEach(member -> send(session.getGroup(), member.getUser(), event + ":" + session.getId(), message));
+                .forEach(member -> send(session.getGroup(), member.getUser(), event + ":" + session.getId(), message, sessionPath(session)));
     }
     private void notifyParticipantsAndManagers(GroupSession session, String event, String message) {
-        Set<User> targets = new HashSet<>();
-        votes.findAllBySessionIdAndStatus(session.getId(), SessionVoteStatus.ATTENDING).forEach(vote -> targets.add(vote.getMember().getUser()));
+        Set<Long> managerUserIds = new HashSet<>();
         members.findAllByGroupIdAndStatus(session.getGroup().getId(), GroupMemberStatus.ACTIVE).stream()
-                .filter(member -> member.getRole() != GroupMemberRole.MEMBER).forEach(member -> targets.add(member.getUser()));
-        targets.forEach(user -> send(session.getGroup(), user, event + ":" + session.getId(), message));
+                .filter(member -> member.getRole() != GroupMemberRole.MEMBER)
+                .forEach(member -> {
+                    managerUserIds.add(member.getUser().getId());
+                    send(session.getGroup(), member.getUser(), event + ":" + session.getId(), message, "/sessions/" + session.getId() + "/dashboard");
+                });
+        votes.findAllBySessionIdAndStatus(session.getId(), SessionVoteStatus.ATTENDING).stream()
+                .filter(vote -> !managerUserIds.contains(vote.getMember().getUser().getId()))
+                .forEach(vote -> send(session.getGroup(), vote.getMember().getUser(), event + ":" + session.getId(), message, "/sessions/" + session.getId() + "/status"));
     }
-    private void send(Group group, User user, String eventKey, String message) {
+    private void send(Group group, User user, String eventKey, String message, String targetPath) {
         if (dispatches.existsByEventKeyAndUserId(eventKey, user.getId())) return;
-        notifications.send(user, NotificationType.GROUP, group.getName(), message, "/groups/" + group.getId());
+        notifications.send(user, NotificationType.GROUP, group.getName(), message, targetPath);
         dispatches.save(GroupNotificationDispatch.create(eventKey, user));
     }
+    private String sessionPath(GroupSession session) { return "/groups/" + session.getGroup().getId() + "/schedule?sessionId=" + session.getId(); }
 }
