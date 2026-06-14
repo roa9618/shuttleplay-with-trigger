@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Logo from '../components/Logo';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -9,10 +9,49 @@ import { Switch } from '../components/ui/switch';
 import { ArrowLeft, User, Bell, Palette, LogOut, Wifi, Smartphone } from 'lucide-react';
 import { useActionFeedback } from '../utils/useActionFeedback';
 import { styles } from './SettingsPage.styles';
+import {
+  disableSystemNotifications,
+  enableSystemNotifications,
+  getSystemNotificationStatus,
+  type SystemNotificationStatus,
+} from '../utils/pushNotification';
 
 export default function SettingsPage() {
   const { message, showMessage } = useActionFeedback();
   const [installGuideOpen, setInstallGuideOpen] = useState(false);
+  const [systemNotificationStatus, setSystemNotificationStatus] = useState<SystemNotificationStatus>('unsubscribed');
+
+  useEffect(() => {
+    void getSystemNotificationStatus()
+      .then(setSystemNotificationStatus)
+      .catch(() => setSystemNotificationStatus('disabled'));
+  }, []);
+
+  const handleSystemNotification = async () => {
+    try {
+      if (systemNotificationStatus === 'subscribed') {
+        await disableSystemNotifications();
+        setSystemNotificationStatus('unsubscribed');
+        showMessage('시스템 알림을 해제했습니다.');
+        return;
+      }
+
+      const status = await enableSystemNotifications(true);
+      setSystemNotificationStatus(status);
+
+      const statusMessage = {
+        subscribed: '시스템 알림을 설정했습니다.',
+        denied: '브라우저 설정에서 알림 권한을 허용해주세요.',
+        unsupported: '이 브라우저에서는 시스템 알림을 지원하지 않습니다.',
+        disabled: '서버의 시스템 알림 설정이 필요합니다.',
+        unsubscribed: '시스템 알림 권한을 허용해주세요.',
+      }[status];
+
+      showMessage(statusMessage);
+    } catch {
+      showMessage('시스템 알림 설정 중 오류가 발생했습니다.');
+    }
+  };
 
   return (
     <div className = {styles.page}>
@@ -182,10 +221,10 @@ export default function SettingsPage() {
                 )}
               </div>
               <div className = {styles.summaryBox}>
-                <p className = {styles.summaryText2}>푸시 알림 권한</p>
+                <p className = {styles.summaryText2}>시스템 알림 받기</p>
                 <p className = {styles.descriptionText3}>다음 경기, 경기 시작, 출석 요청을 받습니다.</p>
-                <Button className = {styles.roundButton} onClick = {() => showMessage('푸시 알림 권한을 요청했습니다.')}>
-                  권한 요청
+                <Button className = {styles.roundButton} onClick = {handleSystemNotification}>
+                  {systemNotificationStatus === 'subscribed' ? '알림 해제' : '알림 받기'}
                 </Button>
               </div>
             </div>

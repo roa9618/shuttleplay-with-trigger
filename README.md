@@ -88,6 +88,22 @@ gradlew classes --continuous
 http://localhost:8080
 ```
 
+Web Push VAPID keys
+
+```bash
+npx web-push generate-vapid-keys
+```
+
+PowerShell
+
+```powershell
+$env:SHUTTLEPLAY_WITH_TRIGGER_WEB_PUSH_SUBJECT="mailto:your-email@example.com"
+$env:SHUTTLEPLAY_WITH_TRIGGER_WEB_PUSH_PUBLIC_KEY="generated-public-key"
+$env:SHUTTLEPLAY_WITH_TRIGGER_WEB_PUSH_PRIVATE_KEY="generated-private-key"
+```
+
+VAPID 키가 설정되지 않으면 Web Push만 비활성화되며 기존 웹소켓 알림은 정상 동작합니다.
+
 Database
 
 ```sql
